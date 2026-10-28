@@ -39,7 +39,15 @@ def main(argv=None) -> int:
     s = sub.add_parser("status")
     s.add_argument("run_id")
 
+    w = sub.add_parser("web", help="serve the BAA console UI (localhost, full control)")
+    w.add_argument("--port", type=int, default=8788)
+
     a = p.parse_args(argv)
+
+    if a.cmd == "web":
+        from baa.web import main as web_main
+        web_main(a.port)
+        return 0
 
     if a.cmd == "status":
         from baa.core.card import Ledger

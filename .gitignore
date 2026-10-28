@@ -3,3 +3,7 @@ __pycache__/
 .env
 .env.local
 .env.*
+!runs/ledger.sample.json
+runs/*/work.html
+runs/*/probe_*.html
+.baa_cache/
