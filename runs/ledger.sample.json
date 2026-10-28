@@ -1,0 +1,15 @@
+{
+  "meta": {"run_id": "windward-trader-demo", "phase": "D"},
+  "cards": [
+    {"id":"scene-rig","title":"three.js scene + camera rig","layer":"L0-engine","status":"pass","attempts":1,"repairs":0,"acceptance":"Renderer boots, follow-camera updates per frame, zero console errors.","test_source":"// acceptance test (auto-generated, TEST-FIRST)\nconst st = getState();\nassert(st.renderer && st.scene, 'renderer+scene boot');\nstepFrames(120);\nassert(!Number.isNaN(getState().camera.position.x), 'camera finite');"},
+    {"id":"input-map","title":"keyboard/mouse input map","layer":"L0-engine","status":"pass","attempts":1,"repairs":0,"acceptance":"WASD + mouse events dispatch into state; no dead keys."},
+    {"id":"fixed-timestep","title":"fixed timestep loop","layer":"L0-engine","status":"patched","attempts":2,"repairs":1,"acceptance":"Physics steps at 60Hz regardless of FPS; spiral-of-death guard."},
+    {"id":"hull-body","title":"rigid hull body","layer":"L1-physics","status":"pass","attempts":1,"repairs":0,"acceptance":"Mass/inertia sane; no NaN in velocity after 600 frames."},
+    {"id":"buoyancy","title":"water buoyancy + drag","layer":"L1-physics","status":"pass","attempts":2,"repairs":0,"acceptance":"Boat settles at waterline within 3s; drift decays."},
+    {"id":"wind-model","title":"global wind field","layer":"L3-systems","status":"in_progress","attempts":1,"repairs":0,"acceptance":"Apparent-wind vector updates when heading changes; gust variance bounded."},
+    {"id":"sail-trim","title":"sail trim + tack penalty","layer":"L4-mechanics","status":"pending","attempts":0,"repairs":0,"acceptance":"Beat-to-wind loses speed; reach gains max thrust."},
+    {"id":"hud-gauges","title":"compass/speed/wind HUD","layer":"L5-ui","status":"pending","attempts":0,"repairs":0,"acceptance":"HUD ids exist; values mirror state each frame."},
+    {"id":"islands","title":"procedural islands + routes","layer":"L6-content","status":"pending","attempts":0,"repairs":0,"acceptance":"8+ islands seeded deterministically; trade route graph connected."},
+    {"id":"wake-fx","title":"wake particles + water shader","layer":"L7-feel","status":"pending","attempts":0,"repairs":0,"acceptance":"Particle pool recycled; frame cost < 1.5ms."}
+  ]
+}
