@@ -81,21 +81,44 @@ Copy `.env.example` to `.env`. Keys are read from the environment or posted per-
 
 ## Deployment
 
-**Render (recommended).** FastAPI serves both the API and the built console at one origin — no
-CORS, one service.
+### Make the app open at your repo URL
+
+This is the step that was broken in v1: the app existed, but the repo's Pages
+URL served a README instead of the app, because the app lived on an unmerged
+branch and the deploy workflow was wired to a branch that had no code.
+
+Three things must be true for the app to open at
+`https://<user>.github.io/<repo>/`:
+
+1. **The code is on the branch Pages publishes.** Merge this PR into `main`.
+2. **Pages source is "GitHub Actions".** Settings → Pages → Source → *GitHub
+   Actions*. (If it points at a branch, the workflow below is ignored and the
+   branch's README is rendered instead.)
+3. **`VITE_API_URL` points at the API.** Settings → Secrets and variables →
+   Actions → Variables → `VITE_API_URL` = your Render URL, e.g.
+   `https://baa.onrender.com`. The Pages-hosted console then calls the API
+   cross-origin, so add the Pages origin to the API's `BAA_CORS_ORIGINS`.
+
+`.github/workflows/pages.yml` builds the console and publishes it on every push
+to `main`; `.github/workflows/ci.yml` runs the test suites and the typecheck on
+every push and PR.
+
+### Render (recommended) — API + console on one origin
+
+`render.yaml` is a Render blueprint: New → Blueprint → point at this repo.
 
 ```
 Build command:  pip install -r requirements.txt && cd html && npm ci && npm run build
 Start command:  uvicorn main:app --host 0.0.0.0 --port $PORT
 ```
 
-**GitHub Pages.** Publish `html/dist` from the Pages workflow. The console then calls the
-Render API cross-origin, so add the Pages origin to `BAA_CORS_ORIGINS` and set
-`VITE_API_URL` at build time.
+FastAPI serves both the API and the built console at `/` — no CORS, one
+service, one domain. Set `BAA_CORS_ORIGINS` to your Pages origin if you also
+publish the console to GitHub Pages.
 
-> Chromium (the Phase 3 sandbox) needs ~1 GB RAM — Render's free tier (512 MB) will OOM.
-> Use the Starter tier, or keep the per-card checks in-browser and reserve Playwright for
-> integration gates only.
+> Chromium (the Phase 3 sandbox) needs ~1 GB RAM — Render's free tier (512 MB)
+> will OOM. Use the Starter tier, or keep the per-card checks in-browser and
+> reserve Playwright for integration gates only.
 
 ## Roadmap
 
