@@ -1,0 +1,61 @@
+name: pages
+
+# Deploys the React console to GitHub Pages.
+#
+# REQUIRES: Settings -> Pages -> Source = "GitHub Actions" (one-time, manual).
+# The console calls the API at VITE_API_URL — set it as a repository *variable*
+# (Settings -> Secrets and variables -> Actions -> Variables) pointing at your
+# Render deployment, e.g. https://baa.onrender.com
+# Leave it empty only if the API is served from the same origin.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: html/package-lock.json
+
+      - name: Install console deps
+        run: npm ci
+        working-directory: html
+
+      - name: Build console
+        run: npm run build
+        working-directory: html
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_BASE: ${{ vars.VITE_BASE || '/' }}
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: html/dist
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

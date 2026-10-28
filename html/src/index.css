@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink-950: #080a10;
+  --color-ink-900: #0b0e14;
+  --color-ink-850: #0f141e;
+  --color-ink-800: #121723;
+  --color-ink-700: #1e2636;
+  --color-ink-600: #2b3448;
+
+  --color-mist-100: #e4eaf5;
+  --color-mist-200: #d7deeb;
+  --color-mist-400: #8a94a7;
+  --color-mist-500: #6b7488;
+
+  --color-acc-400: #4fdcA0;
+  --color-acc-500: #37c98f;
+  --color-acc-600: #2aa876;
+  --color-sky-400: #5aa7ff;
+  --color-amber-400: #ffb454;
+  --color-rose-400: #ff5f56;
+  --color-violet-400: #b06bff;
+
+  --font-mono:
+    "SF Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink-900);
+  color: var(--color-mist-200);
+  font-family:
+    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Thin scrollbars so dense panels stay readable. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-700) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-ink-700);
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@keyframes baa-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+.baa-pulse {
+  animation: baa-pulse 1.4s infinite;
+}

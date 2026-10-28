@@ -1,0 +1,30 @@
+# Render blueprint — one-click deploy of the API + console.
+#
+#   1. Push this repo to GitHub
+#   2. Render dashboard -> New -> Blueprint -> point at this repo
+#   3. Fill in the sync:false values when prompted
+#
+# The API and the built React console are served from ONE origin at /, so there
+# is no CORS and only one service to run.
+
+services:
+  - type: web
+    name: baa
+    runtime: python
+    plan: starter # Chromium (Phase 3 sandbox) needs ~1 GB; the free tier OOMs
+    region: oregon
+    buildCommand: pip install -r requirements.txt && cd html && npm ci && npm run build
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: BAA_PORT
+        value: "8000"
+      - key: BAA_SERVE_CONSOLE
+        value: "true"
+      - key: BAA_CORS_ORIGINS
+        sync: false # e.g. https://<user>.github.io  (add the Pages origin)
+      - key: OPENAI_API_KEY
+        sync: false # BYOK — you can also paste a key per-run from the console
+      - key: YDC_API_KEY
+        sync: false # optional: unlocks the keyed web-search tier
