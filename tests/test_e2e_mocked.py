@@ -21,7 +21,7 @@ SPEC = {"game_id": "test-game", "title": "Test Game", "genre": "arcade",
         "content": {"levels": 3, "procedural": ["map"]},
         "feel": {"audio": ["blip"], "particles": ["spark"], "camera_fx": []},
         "perf_target": {"fps_min": 30, "frame_budget_ms": 33},
-        "fidelity_checklist": [f"when input then feature {i} responds"] + ["extra behavior covered by generic card"] * 7}
+        "fidelity_checklist": [f"when input then feature {i} responds" for i in range(8)]}
 
 LAYERS = ["L0-engine","L1-physics","L2-entities","L3-systems","L4-mechanics",
           "L5-ui","L6-content","L7-feel"]
@@ -33,13 +33,13 @@ CARDS = [{"id": f"feat-{i}", "title": f"Feature {i}", "layer": LAYERS[i],
 SCAFFOLD_SECTIONS = ["head","css","dom","data","core-engine","physics","entities",
                      "systems","mechanics","ui","content","feel","boot"]
 
-SPEC["fidelity_checklist"] = SPEC["fidelity_checklist"][:8]
 
 def fake_scaffold():
+    from baa.stages.microloop import SECTION_BY_LAYER
     parts = ["<!DOCTYPE html><html><head><title>Test Game</title></head><body>"]
     for s in SCAFFOLD_SECTIONS:
-        body = "\n".join(f"/* TODO({c['id']}) */" for c in CARDS
-                         if c["layer"].endswith(s.split("-")[0]) or s in ("data","boot"))
+        owners = [c["id"] for c in CARDS if s in SECTION_BY_LAYER[c["layer"]]]
+        body = "\n".join(f"/* TODO({cid}) */" for cid in owners)
         if s == "data":
             body = "const GAME_DATA = { wind: { maxSpeed: 12 }, scoring: { pointsPerKill: 10 } };"
         parts.append(f"<script>/*==SECTION:{s}==*/\n{body}\n/*==END:{s}==*/</script>")
@@ -48,14 +48,16 @@ def fake_scaffold():
 
 class FakeLLM:
     def complete(self, system, user, tag=""):
+        if tag == "scaffold":
+            return fake_scaffold()
         if tag.startswith("impl") or tag.startswith("repair"):
-            # echo back the requested sections with TODO replaced by code
+            # echo back ONLY the sections this card owns (found in CURRENT SECTIONS header)
             out = []
             for s in SCAFFOLD_SECTIONS:
-                if f"--- SECTION {s} ---" in user or f"SECTION {s}" in user:
+                if f"--- SECTION {s} ---" in user:
                     out.append(f"/*==SECTION:{s}==*/\nfunction impl_{s.replace('-','_')}(){{ window.__GAME_STATE__={{entityCount:1}}; }}\n/*==END:{s}==*/")
-            return "\n".join(out) if out else ""
-        return "{}"
+            return "\n".join(out)
+        return ""
     def complete_json(self, system, user, tag=""):
         if tag == "spec": return SPEC
         if tag == "decompose": return {"cards": CARDS}
