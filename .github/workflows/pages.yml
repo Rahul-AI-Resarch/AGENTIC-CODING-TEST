@@ -38,11 +38,7 @@ jobs:
       - name: Assemble docs/ site from web console
         run: |
           mkdir -p docs
-          cp web/index.html web/app.js docs/
-          # optional: if a sample ledger exists, ship it for read-only Pages view
-          if [ -f runs/ledger.sample.json ]; then
-            mkdir -p docs/runs && cp runs/ledger.sample.json docs/runs/
-          fi
+          cp web/index.html web/app.js web/baa-core.js web/baa-llm.js docs/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
