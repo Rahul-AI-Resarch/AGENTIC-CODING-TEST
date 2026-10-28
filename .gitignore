@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Secrets — never commit real keys
+.env
+.env.*
+!.env.example
+
+# Runtime data (SQLite db + per-run folders)
+data/
+
+# Node
+html/node_modules/
+html/dist/
+html/.vite/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
