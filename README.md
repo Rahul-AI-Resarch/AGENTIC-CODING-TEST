@@ -21,6 +21,8 @@ api/                    The API contract (one table) + framework-free handlers
 core/                   config · event bus (SSE) · id & slug helpers   [stdlib only]
 storage/                SQLite run metadata + on-disk run folders       [stdlib only]
 tools/devstub.py        Dependency-free dev server, same API contract
+tools/install_workflows.sh   Copies deploy/*.yml into .github/workflows/
+deploy/                 ci.yml + pages.yml (see tools/install_workflows.sh)
 tests/                  stdlib unittest: core suite + frontend/backend contract test
 html/                   React 18 + Vite + TypeScript + Tailwind console
 data/                   Runtime data (gitignored): baa.db + runs/<id>/
@@ -87,21 +89,34 @@ This is the step that was broken in v1: the app existed, but the repo's Pages
 URL served a README instead of the app, because the app lived on an unmerged
 branch and the deploy workflow was wired to a branch that had no code.
 
-Three things must be true for the app to open at
-`https://<user>.github.io/<repo>/`:
+**The fastest route (no workflow files, one click):** deploy the API + console
+to Render with the blueprint — FastAPI serves both at one origin, so the repo
+URL isn't involved at all.
 
-1. **The code is on the branch Pages publishes.** Merge this PR into `main`.
-2. **Pages source is "GitHub Actions".** Settings → Pages → Source → *GitHub
-   Actions*. (If it points at a branch, the workflow below is ignored and the
-   branch's README is rendered instead.)
-3. **`VITE_API_URL` points at the API.** Settings → Secrets and variables →
+**The GitHub Pages route:**
+
+```bash
+bash tools/install_workflows.sh   # copies deploy/*.yml -> .github/workflows/
+git add .github/workflows && git commit -m "ci: install workflows"
+```
+
+(The two workflow files live in `deploy/` because automated writes to
+`.github/workflows/` are blocked by the GitHub App's security policy — workflow
+files can read repository secrets. The install script is a one-liner.)
+
+Then two settings:
+
+1. **Pages source is "GitHub Actions".** Settings → Pages → Source → *GitHub
+   Actions*. (If it points at a branch, the workflow is ignored and that
+   branch's README is rendered instead — exactly the v1 failure.)
+2. **`VITE_API_URL` points at the API.** Settings → Secrets and variables →
    Actions → Variables → `VITE_API_URL` = your Render URL, e.g.
    `https://baa.onrender.com`. The Pages-hosted console then calls the API
    cross-origin, so add the Pages origin to the API's `BAA_CORS_ORIGINS`.
 
-`.github/workflows/pages.yml` builds the console and publishes it on every push
-to `main`; `.github/workflows/ci.yml` runs the test suites and the typecheck on
-every push and PR.
+`deploy/pages.yml` builds the console and publishes it on every push to `main`;
+`deploy/ci.yml` runs the test suites and the console typecheck/build on every
+push and PR.
 
 ### Render (recommended) — API + console on one origin
 
